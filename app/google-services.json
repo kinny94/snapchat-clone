@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "315110285196",
+    "firebase_url": "https://snapchat-clone-48917.firebaseio.com",
+    "project_id": "snapchat-clone-48917",
+    "storage_bucket": "snapchat-clone-48917.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315110285196:android:1f5246aa7ecd6dbb",
+        "android_client_info": {
+          "package_name": "com.example.kinny.snapchat_clone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "315110285196-gbcns3dub3fq0cd6u9qe74q08u5vo6np.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kinny.snapchat_clone",
+            "certificate_hash": "cc3faa260a8bd341059f83ebff9d422d041d0380"
+          }
+        },
+        {
+          "client_id": "315110285196-mqs85h3f589peq4rldv2em6r3uph0304.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCMXxOHxjcuZPjOPIgCoLjtZBKpszn7Bs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "315110285196-mqs85h3f589peq4rldv2em6r3uph0304.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
