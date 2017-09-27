@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -23,6 +24,7 @@ public class UserList extends AppCompatActivity {
 
     RelativeLayout relativeLayout;
     ListView userList;
+    ArrayAdapter arrayAdapter;
     ArrayList<String> usernames;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("users");
@@ -36,6 +38,8 @@ public class UserList extends AppCompatActivity {
         userList = (ListView) findViewById(R.id.userList);
 
         usernames = new ArrayList<String>();
+        arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, usernames);
+        userList.setAdapter(arrayAdapter);
 
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -43,6 +47,7 @@ public class UserList extends AppCompatActivity {
                 for(DataSnapshot data: dataSnapshot.getChildren()){
                     usernames.add(String.valueOf(data.child("username").getValue()));
                 }
+                arrayAdapter.notifyDataSetChanged();
             }
 
             @Override
