@@ -1,5 +1,6 @@
 package com.example.kinny.snapchat_clone;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         email = (EditText) findViewById(R.id.email);
@@ -59,10 +61,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // User is signed in - Go to next Activity
+                    Intent i  = new Intent(getApplicationContext(), UserList.class);
+                    startActivity(i);
                 } else {
-                   //Either signin or signup
-
+                    makeToast("Please Signup or Login!");
                 }
             }
         };
@@ -147,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(task.isSuccessful()){
                     makeToast("User created!!, go to some other actvity");
                     myRef.push().setValue(newUSer);
+                    Intent i = new Intent(getApplication(), UserList.class);
+                    startActivity(i);
                 }
             }
         });
@@ -164,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if(task.isSuccessful()){
+                    Intent i = new Intent(getApplication(), UserList.class);
+                    startActivity(i);
                     makeToast("Logged in, Go to some other activity!");
                 }
             }
