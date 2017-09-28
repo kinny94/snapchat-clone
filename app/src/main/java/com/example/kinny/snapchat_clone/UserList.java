@@ -89,25 +89,17 @@ public class UserList extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(UserList.this);
                     builder.setTitle("You have a new Snap!!");
                     TextView content = new TextView(UserList.this);
-                    content.setGravity(Gravity.CENTER_HORIZONTAL);
                     content.setText(senderName  + " has sent you an snap!!");
+                    content.setGravity(Gravity.CENTER_HORIZONTAL);
                     builder.setView(content);
 
                     builder.setPositiveButton("View", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(UserList.this);
+
                             builder.setTitle("You message");
-
                             final ImageView content = new ImageView(UserList.this);
-                            content.setLayoutParams(new ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    500
-                            ));
-                            content.getLayoutParams().height = 1000;
-                            content.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
-                            content.setId(View.generateViewId());
-
                             String exactStorageLocation = imageStorageUrl.replace("%40", "@");
                             Log.i("exact", exactStorageLocation);
                             StorageReference current = storage.getReferenceFromUrl(exactStorageLocation);
@@ -122,6 +114,8 @@ public class UserList extends AppCompatActivity {
                                     Log.i("Error", exception.getLocalizedMessage());
                                 }
                             });
+
+                            builder.setView(content);
 
                             builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
                                 @Override
