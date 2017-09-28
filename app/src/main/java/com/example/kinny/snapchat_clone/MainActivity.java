@@ -21,8 +21,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnKeyListener  {
 
@@ -86,9 +89,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void signupOrLogin(View view){
 
-        String emailText = String.valueOf(email.getText());
-        String passwordText = String.valueOf(password.getText());
-        String usernameText = String.valueOf(username.getText());
+        final String emailText = String.valueOf(email.getText());
+        final String passwordText = String.valueOf(password.getText());
+        final String usernameText = String.valueOf(username.getText());
 
 
         if(signupModeActive){
@@ -112,7 +115,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return;
             }
 
-            signupNewUser(emailText, passwordText, usernameText);
+            myRef.addValueEventListener(new ValueEventListener() {
+
+                boolean usernameTaken = false;
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot data: dataSnapshot.getChildren()){
+                        if((String.valueOf(data.child("username").getValue())).equals(usernameText)){
+                            usernameTaken = true;
+                        }
+                    }
+
+                    if(usernameTaken){
+                        makeToast("Username Already take, Try something new!");
+                    }else{
+                        signupNewUser(emailText, passwordText, usernameText);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.i("Database Error", databaseError.getDetails());
+                }
+
+            });
 
         }else{
             if(TextUtils.isEmpty(emailText)){

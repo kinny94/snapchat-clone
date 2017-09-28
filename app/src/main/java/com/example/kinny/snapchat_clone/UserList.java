@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,13 +45,14 @@ public class UserList extends AppCompatActivity {
     ArrayList<String> usernames;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("users");
+    DatabaseReference imageReference = database.getReference("images");
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference mStorageRef;
     ProgressBar progressBar;
-    DatabaseReference ref;
+    String currentUser;
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(final int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK && data != null){
@@ -72,25 +74,13 @@ public class UserList extends AppCompatActivity {
                 uploadTask.addOnSuccessListener(UserList.this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        progressBar.setVisibility(View.GONE);;
+                        @SuppressWarnings("VisibleForTests") String downloadUrl = String.valueOf(taskSnapshot.getDownloadUrl());
+                        String senderName = currentUser;
+                        String recipientName = usernames.get(requestCode);
 
-//                        ref.addListenerForSingleValueEvent(
-//                                new ValueEventListener() {
-//                                    @Override
-//                                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                                        for(DataSnapshot data: dataSnapshot.getChildren()){
-//                                            if(String.valueOf(data.getKey()).equals(currentUser)) {
-//                                                ref.child(String.valueOf(currentUser)).child("images").push().setValue(String.valueOf(mStorageRef));
-//                                            }
-//                                        }
-//                                    }
-//
-//                                    @Override
-//                                    public void onCancelled(DatabaseError databaseError) {
-//                                        //handle databaseError
-//                                        Log.w("data", "Failed to read value.", databaseError.toException());
-//                                    }
-//                                });
+                        Images newImage = new Images(downloadUrl, senderName, recipientName);
+
+                        imageReference.push().setValue(newImage);
                         Toast.makeText(getApplicationContext(), "Photo Uploaded!", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -108,7 +98,6 @@ public class UserList extends AppCompatActivity {
         setContentView(R.layout.activity_user_list);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
-        ref = FirebaseDatabase.getInstance().getReference("users");
 
         relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
         userList = (ListView) findViewById(R.id.userList);
@@ -130,7 +119,11 @@ public class UserList extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot data: dataSnapshot.getChildren()){
-                    usernames.add(String.valueOf(data.child("username").getValue()));
+                    if(!(String.valueOf(data.child("email").getValue()).equals(MainActivity.user.getEmail()))){
+                        usernames.add(String.valueOf(data.child("username").getValue()));
+                    }else{
+                        currentUser = String.valueOf(data.child("username").getValue());
+                    }
                 }
                 arrayAdapter.notifyDataSetChanged();
             }
