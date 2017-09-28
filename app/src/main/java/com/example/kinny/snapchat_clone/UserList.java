@@ -1,25 +1,33 @@
 package com.example.kinny.snapchat_clone;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.BitmapCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,10 +40,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+
+import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+
+import static com.example.kinny.snapchat_clone.R.id.image;
+import static com.example.kinny.snapchat_clone.R.id.imageView;
 
 public class UserList extends AppCompatActivity {
 
@@ -50,6 +67,99 @@ public class UserList extends AppCompatActivity {
     private StorageReference mStorageRef;
     ProgressBar progressBar;
     String currentUser;
+
+
+    public void checkForImages(){
+        imageReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, String> imagesList = new HashMap<String, String>();
+                for(DataSnapshot data: dataSnapshot.getChildren()){
+                    if((String.valueOf(data.child("recipientName").getValue()).equals(currentUser))){
+                        imagesList.put(String.valueOf(data.child("imageUrl").getValue()), String.valueOf(data.child("senderName").getValue()));
+                    }
+                }
+
+                for(Map.Entry<String, String> entry: imagesList.entrySet()){
+                    final String imageStorageUrl = entry.getKey();
+                    String senderName = entry.getValue();
+
+                    Log.i("ImageStorageUlr", imageStorageUrl);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(UserList.this);
+                    builder.setTitle("You have a new Snap!!");
+                    TextView content = new TextView(UserList.this);
+                    content.setGravity(Gravity.CENTER_HORIZONTAL);
+                    content.setText(senderName  + " has sent you an snap!!");
+                    builder.setView(content);
+
+                    builder.setPositiveButton("View", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(UserList.this);
+                            builder.setTitle("You message");
+
+                            final ImageView content = new ImageView(UserList.this);
+                            content.setLayoutParams(new ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    500
+                            ));
+                            content.getLayoutParams().height = 1000;
+                            content.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                            content.setId(View.generateViewId());
+
+                            String exactStorageLocation = imageStorageUrl.replace("%40", "@");
+                            Log.i("exact", exactStorageLocation);
+                            StorageReference current = storage.getReferenceFromUrl(exactStorageLocation);
+                            current.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Picasso.with(UserList.this).load(uri.toString()).into(content);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    Log.i("Error", exception.getLocalizedMessage());
+                                }
+                            });
+
+                            builder.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    imageReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            for(DataSnapshot data: dataSnapshot.getChildren()){
+                                                if((String.valueOf(data.child("imageUrl").getValue()).equals(imageStorageUrl))){
+                                                    data.getRef().removeValue();
+                                                }
+                                            }
+                                            arrayAdapter.notifyDataSetChanged();
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+                            });
+
+                            builder.show();
+                        }
+                    });
+
+                    builder.show();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("Database Error", databaseError.getDetails());
+            }
+        });
+    }
 
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, final Intent data) {
@@ -90,6 +200,7 @@ public class UserList extends AppCompatActivity {
             }
 
         }
+        checkForImages();
     }
 
     @Override
