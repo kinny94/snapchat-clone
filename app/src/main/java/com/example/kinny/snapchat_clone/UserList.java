@@ -98,7 +98,7 @@ public class UserList extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(UserList.this);
 
-                            builder.setTitle("You message");
+                            builder.setTitle("Your message");
                             final ImageView content = new ImageView(UserList.this);
                             String exactStorageLocation = imageStorageUrl.replace("%40", "@");
                             Log.i("exact", exactStorageLocation);
@@ -106,7 +106,7 @@ public class UserList extends AppCompatActivity {
                             current.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-                                    Picasso.with(UserList.this).load(uri.toString()).into(content);
+                                    Picasso.with(UserList.this).load(uri.toString()).placeholder(R.drawable.placeholder).into(content);
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -125,7 +125,20 @@ public class UserList extends AppCompatActivity {
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             for(DataSnapshot data: dataSnapshot.getChildren()){
                                                 if((String.valueOf(data.child("imageUrl").getValue()).equals(imageStorageUrl))){
+                                                    mStorageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imageStorageUrl);
+                                                    mStorageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            Log.i("Removed", "Removed from storage!");
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Log.i("Removed", "Failure!!");
+                                                        }
+                                                    });
                                                     data.getRef().removeValue();
+
                                                 }
                                             }
                                             arrayAdapter.notifyDataSetChanged();
@@ -194,13 +207,14 @@ public class UserList extends AppCompatActivity {
             }
 
         }
-        checkForImages();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
+
+        checkForImages();
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
 
