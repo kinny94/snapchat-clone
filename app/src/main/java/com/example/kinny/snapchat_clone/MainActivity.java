@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if(task.isSuccessful()){
-                    makeToast("User created!!, go to some other actvity");
                     myRef.push().setValue(newUSer);
                     Intent i = new Intent(getApplication(), UserList.class);
                     startActivity(i);
